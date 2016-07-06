@@ -23,19 +23,21 @@ function gen(): AstNode {
         }
 
         let weights: Weights<() => AstNode> = [
-            [3, () => new Variable('x')],
-            [3, () => new Variable('y')],
-            [3, () => new Variable('t')],
+            [8.0, () => new Variable('x')],
+            [8.0, () => new Variable('y')],
+            [8.0, () => new Variable('t')],
 
-            [1, () => new Add(generate_program(), generate_program())],
-            [1, () => new Sub(generate_program(), generate_program())],
-            [1, () => new Mul(generate_program(), generate_program())],
-            [1, () => new Div(generate_program(), generate_program())],
+            [2.0, () => new Add(generate_program(), generate_program())],
+            [2.0, () => new Sub(generate_program(), generate_program())],
+            [0.5, () => new Min(generate_program(), generate_program())],
+            [0.5, () => new Max(generate_program(), generate_program())],
+            [1.0, () => new Mul(generate_program(), generate_program())],
+            [1.0, () => new Div(generate_program(), generate_program())],
 
-            [1, () => new And(generate_program(), generate_program())],
-            [1, () => new Or(generate_program(), generate_program())],
-            [1, () => new Xor(generate_program(), generate_program())],
-            [1, () => new Mod(generate_program(), generate_program())],
+            [3.0, () => new And(generate_program(), generate_program())],
+            [3.0, () => new Or(generate_program(), generate_program())],
+            [3.0, () => new Xor(generate_program(), generate_program())],
+            [3.0, () => new Mod(generate_program(), generate_program())],
         ];
 
         return get(weights)();
@@ -45,7 +47,7 @@ function gen(): AstNode {
 
     do {
         fin = generate_program();
-    } while (fin.count_nodes() < 5);
+    } while (fin.count_nodes() < 5 || fin.count_nodes() > 30);
 
     return fin;
 }
@@ -74,6 +76,30 @@ abstract class BinOp implements AstNode {
     }
 }
 
+abstract class FnOp implements AstNode {
+    x: AstNode;
+    y: AstNode;
+    op: string;
+
+    constructor(op, x, y) {
+        this.x = x;
+        this.y = y;
+        this.op = op;
+    }
+
+    eval(): string {
+        return `(${this.op}(${this.x.eval()}, ${this.y.eval()}))`
+    };
+
+    count_nodes(): number {
+        return 1 + this.x.count_nodes() + this.y.count_nodes();
+    }
+
+    max_depth(): number {
+        return 1 + Math.max(this.x.max_depth(), this.y.max_depth());
+    }
+}
+
 class Variable implements AstNode {
     v: string;
     constructor(v: string) {
@@ -88,6 +114,19 @@ class Variable implements AstNode {
 
     max_depth(): number {
         return 1;
+    }
+}
+
+
+class Min extends FnOp {
+    constructor(x, y) {
+        super('Math.min', x, y);
+    }
+}
+
+class Max extends FnOp {
+    constructor(x, y) {
+        super('Math.max', x, y);
     }
 }
 

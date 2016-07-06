@@ -1,9 +1,7 @@
 let canvasElement = document.querySelector("canvas") as HTMLCanvasElement;
 let canvas = canvasElement.getContext('2d');
 
-let red_input = document.querySelector("#red-input") as HTMLTextAreaElement;
-let green_input = document.querySelector("#green-input") as HTMLTextAreaElement;
-let blue_input = document.querySelector("#blue-input") as HTMLTextAreaElement;
+let input = document.querySelector("#input") as HTMLTextAreaElement;
 let err_input = document.querySelector("#error") as HTMLTextAreaElement;
 
 let rand_button = document.querySelector("#rand") as HTMLButtonElement;
@@ -24,9 +22,9 @@ function draw_with_fn(w: number, h: number, f: (x: number, y: number) => Color) 
         for (let x = 0; x < w; x++) {
             let {r, g, b} = f(x, y);
             let start = x * w * 4 + y * 4;
-            blit.data[start + 0] = r % 256;
-            blit.data[start + 1] = g % 256;
-            blit.data[start + 2] = b % 256;
+            blit.data[start + 0] = Math.min(r, 255);
+            blit.data[start + 1] = Math.min(g, 255);
+            blit.data[start + 2] = Math.min(b, 255);
             blit.data[start + 3] = 255;
         }
     }
@@ -65,35 +63,38 @@ draw_animated_fn(256, 256, (x, y, t) => {
 
 
 submit_button.onclick = function () {
-    function build_function (r: string, g: string, b: string): string {
+    function build_function (input: string): string {
         var s = `(function (x, y, t) {
-            return { r: ${r}, g: ${g}, b: ${b},
-            };
+            ${input}
+            if (result.r != undefined) {
+                return result;
+            } else {
+                return {r: result, g: result, b: result};
+            }
         })`;
         return s;
     }
+    err_input.value = "";
 
-    let r = red_input.value;
-    let g = green_input.value;
-    let b = blue_input.value;
     try {
-        draw_animated_fn(256, 256, eval(build_function(r, g, b)) as any)
+        draw_animated_fn(256, 256, eval(build_function(input.value)) as any)
     } catch (e) {
         err_input.value = "" + e;
     }
 };
 
 rand_button.onclick = function () {
-    red_input.value = (window as any).gen().eval();
-    green_input.value = (window as any).gen().eval();
-    blue_input.value = (window as any).gen().eval();
+    let r = (window as any).gen().eval();
+    let g = (window as any).gen().eval();
+    let b = (window as any).gen().eval();
+    input.value = `var result = {\n  r: ${r},\n  g: ${g},\n  b: ${b}\n};`;
     submit_button.click();
 };
 
+rand_button.click();
+
 var saved = [
-    {
-        r: "0",
-        g: "0",
-        b: "(((t | y) ^ x) + (t / (y & x)))",
-    }
-]
+    "var result = {r: 0, g: ((t * (x - ((y + x) & x))) + t), b: (t + (x & (t & y)))};",
+    "var result = { r: ((t / (y & x)) * x), g: (x / (x & y)), b: ((t ^ t) / (y | (t + ((x - (x + x)) - x)))) };",
+    "var result = { r: (x & (y + ((y ^ t) ^ t))), g: (((x ^ y) + ((x | x) & t)) % (y + x)), b: (t | (t / x)) };",
+];
