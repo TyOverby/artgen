@@ -1,4 +1,4 @@
-interface AstNode {
+export interface AstNode {
     eval(): string
     count_nodes(): number;
     max_depth(): number;
@@ -6,7 +6,7 @@ interface AstNode {
 
 type Weights<T> = [number, T][]
 
-function gen(): AstNode {
+export function gen(): AstNode {
     function generate_program(): AstNode {
         function get<T>(w: Weights<T>): T {
             let total = w.map(a => a[0]).reduce((a, b) => a + b);
@@ -57,7 +57,7 @@ abstract class BinOp implements AstNode {
     y: AstNode;
     op: string;
 
-    constructor(op, x, y) {
+    constructor(op: string, x: AstNode, y: AstNode) {
         this.x = x;
         this.y = y;
         this.op = op;
@@ -81,7 +81,7 @@ abstract class FnOp implements AstNode {
     y: AstNode;
     op: string;
 
-    constructor(op, x, y) {
+    constructor(op: string, x: AstNode, y: AstNode) {
         this.x = x;
         this.y = y;
         this.op = op;
@@ -119,61 +119,61 @@ class Variable implements AstNode {
 
 
 class Min extends FnOp {
-    constructor(x, y) {
+    constructor(x: AstNode, y: AstNode) {
         super('Math.min', x, y);
     }
 }
 
 class Max extends FnOp {
-    constructor(x, y) {
+    constructor(x: AstNode, y: AstNode) {
         super('Math.max', x, y);
     }
 }
 
 class Add extends BinOp {
-    constructor(x, y) {
+    constructor(x: AstNode, y: AstNode) {
         super('+', x, y);
     }
 }
 
 class Sub extends BinOp {
-    constructor(x, y) {
+    constructor(x: AstNode, y: AstNode) {
         super('-', x, y);
     }
 }
 
 class Mul extends BinOp {
-    constructor(x, y) {
+    constructor(x: AstNode, y: AstNode) {
         super('*', x, y);
     }
 }
 
 class Div extends BinOp {
-    constructor(x, y) {
+    constructor(x: AstNode, y: AstNode) {
         super('/', x, y);
     }
 }
 
 class Or extends BinOp {
-    constructor(x, y) {
+    constructor(x: AstNode, y: AstNode) {
         super('|', x, y);
     }
 }
 
 class And extends BinOp {
-    constructor(x, y) {
+    constructor(x: AstNode, y: AstNode) {
         super('&', x, y);
     }
 }
 
 class Xor extends BinOp {
-    constructor(x, y) {
+    constructor(x: AstNode, y: AstNode) {
         super('^', x, y);
     }
 }
 
 class Mod extends BinOp {
-    constructor(x, y) {
+    constructor(x: AstNode, y: AstNode) {
         super('%', x, y);
     }
 }
