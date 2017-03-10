@@ -32,7 +32,7 @@ export function gen(): AstNode {
             [0.5, () => new Min(generate_program(), generate_program())],
             [0.5, () => new Max(generate_program(), generate_program())],
             [1.0, () => new Mul(generate_program(), generate_program())],
-            [1.0, () => new Div(generate_program(), generate_program())],
+            [0.0, () => new Div(generate_program(), generate_program())],
 
             [3.0, () => new And(generate_program(), generate_program())],
             [3.0, () => new Or(generate_program(), generate_program())],
@@ -47,7 +47,7 @@ export function gen(): AstNode {
 
     do {
         fin = generate_program();
-    } while (fin.count_nodes() < 5 || fin.count_nodes() > 30);
+    } while (fin.count_nodes() < 5 || fin.count_nodes() > 30 || fin.eval().indexOf('t') === -1);
 
     return fin;
 }
